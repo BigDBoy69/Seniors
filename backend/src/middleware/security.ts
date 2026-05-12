@@ -418,7 +418,7 @@ export const speedLimiter = slowDown({
 // ========================================
 
 export const corsMiddleware = cors({
-  origin: (origin, callback) => {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     // In production, require origin to be explicitly trusted
     // In development, allow no-origin requests (curl, Postman, etc.)
     if (!origin) {
