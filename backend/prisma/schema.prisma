@@ -1,0 +1,728 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Division {
+  id        String      @id @default(cuid())
+  key       String      @unique
+  title     String
+  intro     String
+  image     String?
+  visible   Boolean     @default(true)
+  sortOrder Int         @default(0)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  categories Category[]
+  products   Product[]
+  collections Collection[]
+
+  @@index([visible, sortOrder])
+  @@map("divisions")
+}
+
+model Product {
+  id               String        @id @default(cuid())
+  name             String
+  slug             String        @unique
+  description      String?
+  price            Float
+  compareAtPrice   Float?
+  images           String        @default("[]")
+  divisionId       String?
+  division         Division?     @relation(fields: [divisionId], references: [id])
+  categoryId       String?
+  category         Category?     @relation(fields: [categoryId], references: [id])
+  fabric           String?
+  careInstructions String?
+  fitNotes         String?
+  origin           String?
+  status           String        @default("ACTIVE")
+  featured         Boolean       @default(false)
+  isNewArrival     Boolean       @default(false)
+  sortOrder        Int           @default(0)
+  sanityCollectionId String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  variants         Variant[]
+  orderItems       OrderItem[]
+  collections      CollectionProduct[]
+  homepageSections HomeSectionProduct[]
+  wishlistItems    WishlistItem[]
+  productFeature   ProductFeature?
+  userEvents       UserEvent[]
+  productInfo      ProductInfo?
+
+  @@index([status, sortOrder, createdAt])
+  @@index([categoryId, status])
+  @@index([divisionId, status])
+  @@index([featured, status])
+  @@index([isNewArrival, status])
+  @@map("products")
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  description String?
+  image    String?
+  visible  Boolean   @default(true)
+  sortOrder Int      @default(0)
+  divisionId String?
+  division Division? @relation(fields: [divisionId], references: [id])
+  products Product[]
+
+  @@index([divisionId, visible, sortOrder])
+  @@map("categories")
+}
+
+model Variant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size      String?
+  color     String?
+  colorHex  String?
+  stock     Int     @default(0)
+  reserved  Int     @default(0)
+  sku       String?
+
+  orderItems OrderItem[]
+
+  @@index([productId])
+  @@index([productId, stock])
+  @@map("variants")
+}
+
+model Order {
+  id                 String      @id @default(cuid())
+  orderNumber        String      @unique
+  status             String      @default("PENDING")
+  paymentStatus      String      @default("PENDING")
+  fulfillmentStatus  String      @default("UNFULFILLED")
+
+  // Legacy guest checkout support
+  customerId         String?
+  customer           Customer?   @relation(fields: [customerId], references: [id])
+  customerName       String?
+  customerEmail      String?
+  phone              String?
+  city               String?
+  area               String?
+  address            String?
+
+  // Registered user checkout
+  userId             String?
+  user               User?       @relation(fields: [userId], references: [id])
+
+  // Address references
+  shippingAddressId  String?
+  shippingAddress    Address?    @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  billingAddressId   String?
+  billingAddress     Address?    @relation("BillingAddress", fields: [billingAddressId], references: [id])
+
+  notes              String?
+  deliveryNotes      String?
+  subtotal           Float
+  deliveryFee        Float       @default(0)
+  total              Float
+  paymentMethod      String      @default("CASH_ON_DELIVERY")
+
+  // PayMob references
+  paymobIntentionId  String?
+  paymobOrderId      String?
+
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  items              OrderItem[]
+  payment            Payment?
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+  @@index([customerId])
+  @@index([paymentStatus])
+  @@map("orders")
+}
+
+model Payment {
+  id                   String   @id @default(cuid())
+  orderId              String   @unique
+  order                Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  paymobTransactionId  String?  @unique
+  paymobOrderId        String?
+  paymobIntentionId    String?
+
+  amount               Int
+  currency             String   @default("USD")
+  status               String   @default("PENDING")
+
+  cardBrand            String?
+  cardLast4            String?
+  failureReason        String?
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([paymobOrderId])
+  @@index([status])
+  @@map("payments")
+}
+
+model PaymentEvent {
+  id                 String   @id @default(cuid())
+  paymobTransactionId String  @unique
+  eventType          String
+  processed          Boolean  @default(false)
+  processingAttempts Int      @default(0)
+  payload            String   @db.Text
+  processedAt        DateTime?
+  createdAt          DateTime @default(now())
+
+  @@index([paymobTransactionId, processed])
+  @@map("payment_events")
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  variantId String?
+  variant   Variant? @relation(fields: [variantId], references: [id])
+  quantity  Int
+  price     Float
+  size      String?
+  color     String?
+  name      String
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model NewsletterSubscriber {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  source           String?
+  active           Boolean   @default(true)
+  unsubscribeToken String?   @unique
+  unsubscribedAt   DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([active, createdAt])
+  @@map("newsletter_subscribers")
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  name      String
+  email     String
+  phone     String?
+  topic     String   @default("GENERAL")
+  subject   String?
+  message   String
+  status    String   @default("NEW")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status, createdAt])
+  @@map("contact_messages")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("ADMIN")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@map("admins")
+}
+
+model Collection {
+  id         String              @id @default(cuid())
+  title      String
+  slug       String              @unique
+  intro      String?
+  image      String?
+  visible    Boolean             @default(true)
+  sortOrder  Int                 @default(0)
+  divisionId String?
+  division   Division?           @relation(fields: [divisionId], references: [id])
+  products   CollectionProduct[]
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  @@index([divisionId, visible, sortOrder])
+  @@map("collections")
+}
+
+model CollectionProduct {
+  id           String     @id @default(cuid())
+  collectionId String
+  productId    String
+  sortOrder    Int        @default(0)
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, productId])
+  @@map("collection_products")
+}
+
+model HomePageContent {
+  id               String   @id @default("homepage")
+  heroHeading      String   @default("Dressed in Quiet Luxury")
+  heroSubtext      String?
+  heroImage        String?
+  heroButtonText   String   @default("New Arrivals")
+  heroButtonLink   String   @default("/new-arrivals")
+  showFeatured     Boolean  @default(true)
+  showNewsletter   Boolean  @default(true)
+  newsletterLabel  String   @default("Newsletter")
+  newsletterHeading String  @default("Stay in the Conversation")
+  newsletterSubtext String?
+  updatedAt        DateTime @updatedAt
+
+  sections HomePageSection[]
+
+  @@map("homepage_content")
+}
+
+model HomePageSection {
+  id           String             @id @default(cuid())
+  homepageId   String             @default("homepage")
+  homepage     HomePageContent    @relation(fields: [homepageId], references: [id], onDelete: Cascade)
+  key          String             @unique
+  label        String?
+  title        String
+  subtitle     String?
+  ctaLabel     String?
+  ctaLink      String?
+  visible      Boolean            @default(true)
+  sortOrder    Int                @default(0)
+  sectionType  String             @default("FEATURED_PRODUCTS")
+  products     HomeSectionProduct[]
+
+  @@map("homepage_sections")
+}
+
+model HomeSectionProduct {
+  id        String          @id @default(cuid())
+  sectionId String
+  productId String
+  sortOrder Int             @default(0)
+  section   HomePageSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([sectionId, productId])
+  @@map("homepage_section_products")
+}
+
+model NavigationItem {
+  id           String   @id @default(cuid())
+  label        String
+  path         String
+  location     String   @default("HEADER")
+  visible      Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  openInNewTab Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([location, visible, sortOrder])
+  @@map("navigation_items")
+}
+
+model MediaAsset {
+  id        String   @id @default(cuid())
+  title     String?
+  alt       String?
+  url       String
+  mimeType  String?
+  size      Int?
+  source    String   @default("UPLOAD")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@map("media_assets")
+}
+
+model SiteSettings {
+  id                  String   @id @default("site")
+  newsletterLabel     String   @default("Newsletter")
+  newsletterHeading   String   @default("Stay in the Conversation")
+  newsletterText      String?
+  contactEmail        String?
+  contactPhone        String?
+  instagramUrl        String?
+  facebookUrl         String?
+  tiktokUrl           String?
+  // Store policy defaults — product-level fields fall back to these
+  defaultDeliveryInfo String?
+  defaultShippingInfo String?
+  defaultReturnsInfo  String?
+  updatedAt           DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model ProductInfo {
+  id               String   @id @default(cuid())
+  productId        String   @unique
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // Context / editorial
+  subtitle         String?  // shown below category, above name
+  material         String?  // short composition line
+  productDetails   String?  // longer specification / construction block
+  collectionNote   String?  // editorial narrative for this product
+
+  // Size guide (structured)
+  sizeGuideType    String?  // "text" | "url" | null
+  sizeGuideContent String?  // used when sizeGuideType = "text"
+  sizeGuideUrl     String?  // used when sizeGuideType = "url"
+
+  // Service info — product-level overrides; fallback to SiteSettings
+  deliveryInfo     String?
+  shippingInfo     String?
+  returnsInfo      String?
+
+  // Featured info card (optional editorial block)
+  infoCardTitle    String?
+  infoCardBody     String?
+  infoCardImage    String?  // URL from media library
+  infoCardCtaLabel String?
+  infoCardCtaUrl   String?
+
+  updatedAt        DateTime @updatedAt
+
+  @@map("product_info")
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String   @unique
+  city      String?
+  area      String?
+  address   String?
+  notes     String?
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@map("customers")
+}
+
+model User {
+  id                      String    @id @default(cuid())
+  email                   String    @unique
+  passwordHash            String
+  firstName               String?
+  lastName                String?
+  phone                   String?
+  emailVerified           DateTime?
+  verificationToken       String?   @unique
+  verificationTokenExpiry DateTime?
+  passwordResetToken      String?   @unique
+  passwordResetExpiry     DateTime?
+  passwordChangedAt            DateTime?
+  deleteAccountToken           String?   @unique
+  deleteAccountTokenExpiry     DateTime?
+  pendingPasswordHash          String?
+  pendingPasswordToken         String?   @unique
+  pendingPasswordTokenExpiry   DateTime?
+  role                         String    @default("USER")
+  active                  Boolean   @default(true)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  addresses       Address[]
+  wishlist        WishlistItem[]
+  orders          Order[]
+  sessions        Session[]
+  settings        UserSettings?
+  contactMessages ContactMessage[]
+  events          UserEvent[]
+  preference      UserPreference?
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token        String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  userAgent    String?
+  ipAddress    String?
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model Address {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName        String?
+  lastName         String?
+  line1            String
+  line2            String?
+  city             String
+  state            String?
+  postalCode       String?
+  country          String   @default("Lebanon")
+  phone            String?
+  isDefaultShipping Boolean @default(false)
+  isDefaultBilling  Boolean @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  shippingOrders   Order[]  @relation("ShippingAddress")
+  billingOrders    Order[]  @relation("BillingAddress")
+
+  @@index([userId, isDefaultShipping, createdAt])
+  @@map("addresses")
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId String?
+  addedAt   DateTime @default(now())
+
+  @@unique([userId, productId, variantId])
+  @@index([userId, addedAt])
+  @@map("wishlist_items")
+}
+
+model UserSettings {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailMarketing  Boolean  @default(true)
+  smsMarketing    Boolean  @default(false)
+  currency        String   @default("USD")
+  language        String   @default("en")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("user_settings")
+}
+
+// ========================================
+// RECOMMENDATION SYSTEM SCHEMA
+// ========================================
+
+model ProductFeature {
+  id              String   @id @default(cuid())
+  productId       String   @unique
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // Categorical attributes (stored as JSON arrays)
+  styleTags       String   @default("[]")
+  occasionTags    String   @default("[]")
+  seasonTags      String   @default("[]")
+  colorFamily     String?
+  materialType    String?
+  fitType         String?
+  priceTier       Int      @default(2)
+
+  // Numerical feature vector (JSON array of 20 normalized features)
+  featureVector   String   @default("[]")
+
+  // Popularity metrics (updated periodically)
+  viewCount       Int      @default(0)
+  purchaseCount   Int      @default(0)
+  wishlistCount   Int      @default(0)
+  cartAddCount    Int      @default(0)
+  clickCount      Int      @default(0)
+
+  // Dynamic scoring
+  trendingScore   Float    @default(0)
+  popularityScore Float    @default(0)
+  recencyScore    Float    @default(0)
+
+  updatedAt       DateTime @updatedAt
+
+  @@map("product_features")
+}
+
+model UserEvent {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  eventType       String    // VIEW, CLICK, WISHLIST, CART_ADD, PURCHASE, SEARCH
+  productId       String?
+  product         Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // Context
+  sessionId       String?
+  sourcePage      String?
+  position        Int?
+
+  // For purchases
+  orderId         String?
+  quantity        Int?
+  price           Float?
+
+  // Metadata (JSON for extensibility)
+  metadata        String    @default("{}")
+
+  createdAt       DateTime  @default(now())
+
+  @@index([userId, eventType])
+  @@index([productId, eventType])
+  @@index([createdAt])
+  @@map("user_events")
+}
+
+model UserPreference {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Category affinities (JSON: { "dresses": 0.8, "tops": 0.3 })
+  categoryAffinity    String   @default("{}")
+
+  // Style preferences
+  styleAffinity       String   @default("{}")
+  colorAffinity       String   @default("{}")
+  priceAffinity       String   @default("{}")
+  divisionAffinity    String   @default("{}")
+
+  // Behavioral vector for similarity matching (20-dim normalized)
+  preferenceVector    String   @default("[]")
+
+  // Explicit feedback
+  likedCategories     String   @default("[]")
+  dislikedCategories  String   @default("[]")
+
+  updatedAt           DateTime @updatedAt
+
+  @@map("user_preferences")
+}
+
+model RecommendationCache {
+  id            String   @id @default(cuid())
+
+  userId        String?
+  productId     String?
+
+  recType       String   // SIMILAR, PERSONALIZED, COMPLEMENTARY, TRENDING, WISHLIST, NEW_ARRIVALS
+
+  // Results (JSON array of { productId, score, reasons })
+  results       String   @default("[]")
+
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+
+  @@index([userId, recType])
+  @@index([productId, recType])
+  @@index([expiresAt])
+  @@map("recommendation_cache")
+}
+
+model OutfitRule {
+  id              String   @id @default(cuid())
+
+  sourceCategory  String
+  targetCategory  String
+
+  baseScore       Float    @default(0.5)
+  styleMatch      String?  // JSON: { "formal": ["formal", "evening"] }
+  seasonMatch     Boolean  @default(true)
+  isActive        Boolean  @default(true)
+
+  @@unique([sourceCategory, targetCategory])
+  @@map("outfit_rules")
+}
+
+model ProductSimilarity {
+  id            String   @id @default(cuid())
+  sourceId      String
+  targetId      String
+
+  contentScore  Float    @default(0)
+  behaviorScore Float    @default(0)
+  combinedScore Float    @default(0)
+
+  commonTags    String   @default("[]")
+  commonStyles  String   @default("[]")
+
+  updatedAt     DateTime @updatedAt
+
+  @@unique([sourceId, targetId])
+  @@index([sourceId, combinedScore])
+  @@map("product_similarity")
+}
+
+model CategoryCompatibility {
+  id              String   @id @default(cuid())
+  categoryA       String
+  categoryB       String
+
+  compatibility   Float    @default(0)
+  relationship    String   // SIMILAR, COMPLEMENTARY, CONTRAST, INCOMPATIBLE
+  outfitPosition  String?
+
+  @@unique([categoryA, categoryB])
+  @@map("category_compatibility")
+}
+
+model RecAnalytics {
+  id              String   @id @default(cuid())
+
+  userId          String?
+  productId       String
+  recType         String
+  position        Int
+
+  eventType       String   // IMPRESSION, CLICK, WISHLIST, CART_ADD, PURCHASE
+
+  sessionId       String?
+  timestamp       DateTime @default(now())
+
+  // A/B test tracking
+  algorithmVersion String  @default("v1")
+
+  @@index([recType, eventType])
+  @@index([productId, eventType])
+  @@index([timestamp])
+  @@map("rec_analytics")
+}
+
+
+
+
+
+
