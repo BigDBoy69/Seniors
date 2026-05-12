@@ -357,7 +357,7 @@ export function ProductPage() {
             {/* Right: product info — stationary */}
             <div className="w-[48%] h-full overflow-y-auto">
               <div className="min-h-full flex items-center px-16">
-                <InfoPanel />
+                {InfoPanel()}
               </div>
             </div>
           </div>
@@ -442,7 +442,7 @@ export function ProductPage() {
           <ProductGallery images={product.images} name={product.name} />
         </div>
         <div className="px-6 py-8 max-w-md mx-auto">
-          <InfoPanel />
+          {InfoPanel()}
         </div>
         <div className="px-6 mt-4">
           <RecommendationWidget type="similar" productId={product.id} limit={8} variant="product-page" />
