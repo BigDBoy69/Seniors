@@ -126,19 +126,19 @@ export function AccountPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-yellow-900 mb-1">Email Not Verified</h3>
-                    <p className="text-sm text-yellow-800 mb-3">
+                    <h3 className="font-semibold text-charcoal mb-1">Email Not Verified</h3>
+                    <p className="text-sm text-charcoal-700 mb-3">
                       Please verify your email address to access all account features.
                     </p>
                     <button
                       onClick={handleResendVerification}
                       disabled={resendingVerification}
-                      className="text-sm text-yellow-900 font-medium underline hover:no-underline disabled:opacity-50"
+                      className="text-sm text-charcoal font-medium underline hover:no-underline disabled:opacity-50"
                     >
                       {resendingVerification ? 'Sending...' : 'Resend verification email'}
                     </button>
                     {verificationMessage && (
-                      <p className="text-sm text-yellow-800 mt-2">{verificationMessage}</p>
+                      <p className="text-sm text-charcoal-700 mt-2">{verificationMessage}</p>
                     )}
                   </div>
                 </div>

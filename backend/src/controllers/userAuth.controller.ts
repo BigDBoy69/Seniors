@@ -60,6 +60,10 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
       }
       return;
     }
+    if (err instanceof Error && (err.message.includes("domain does not") || err.message.includes("invalid or the domain"))) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
     next(err);
   }
 }
@@ -72,6 +76,10 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     const result = await authenticateUser(email, password, ip, userAgent);
     res.json(result);
   } catch (err) {
+    if (err instanceof Error && err.message === 'email_not_verified') {
+      res.status(403).json({ error: 'Please verify your email before logging in.', emailNotVerified: true });
+      return;
+    }
     if (err instanceof Error && err.message.includes("Invalid credentials")) {
       res.status(401).json({ error: "Invalid email or password" });
       return;

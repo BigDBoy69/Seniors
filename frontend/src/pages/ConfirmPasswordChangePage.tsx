@@ -41,8 +41,8 @@ export function ConfirmPasswordChangePage() {
       <div className="max-w-md w-full text-center space-y-6">
         {status === 'loading' && (
           <>
-            <div className="w-8 h-8 border-2 border-cream/30 border-t-cream rounded-full animate-spin mx-auto" />
-            <p className="text-cream/50 text-sm font-sans">Confirming password change...</p>
+            <div className="w-8 h-8 border-2 border-cream/60 border-t-cream rounded-full animate-spin mx-auto" />
+            <p className="text-cream/70 text-sm font-sans">Confirming password change...</p>
           </>
         )}
 
@@ -55,8 +55,8 @@ export function ConfirmPasswordChangePage() {
             </div>
             <div>
               <p className="font-serif text-2xl text-cream mb-2">Password Updated</p>
-              <p className="text-cream/50 text-sm font-sans">{message}</p>
-              <p className="text-cream/30 text-xs font-sans mt-2">Redirecting to account settings...</p>
+              <p className="text-cream/70 text-sm font-sans">{message}</p>
+              <p className="text-cream/70 text-xs font-sans mt-2">Redirecting to account settings...</p>
             </div>
           </>
         )}
@@ -70,7 +70,7 @@ export function ConfirmPasswordChangePage() {
             </div>
             <div>
               <p className="font-serif text-2xl text-cream mb-2">Link Invalid</p>
-              <p className="text-cream/50 text-sm font-sans">{message}</p>
+              <p className="text-cream/70 text-sm font-sans">{message}</p>
             </div>
             <Link
               to="/account"

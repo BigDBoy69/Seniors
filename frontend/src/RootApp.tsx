@@ -1,4 +1,13 @@
 import { Route, Routes, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
 import { AuthProvider } from '@/hooks/useAuth'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Header } from '@/components/layout/Header'
@@ -57,6 +66,7 @@ function RootApp() {
   return (
     <ErrorBoundary>
     <AuthProvider>
+    <ScrollToTop />
     <div className="min-h-screen flex flex-col">
       {!isAdminRoute && <Header />}
       {!isAdminRoute && <CartDrawer />}

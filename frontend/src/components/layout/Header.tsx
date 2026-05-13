@@ -5,6 +5,7 @@ import { useCart } from '@/hooks/useCart'
 import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import { getStorefrontConfig, type NavigationItem, type Division } from '@/lib/storefront'
+import { resendVerification } from '@/lib/api'
 
 const DEFAULT_NAV = [
   { to: '/men', label: 'Men' },
@@ -237,6 +238,8 @@ export function Header() {
   const [authError, setAuthError] = useState('')
   const [authLoading, setAuthLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState('')
+  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent'>('idle')
   const [selectedTopId, setSelectedTopId] = useState<string | null>(null)
   const [selectedSubId, setSelectedSubId] = useState<string | null>(null)
   const location = useLocation()
@@ -270,6 +273,8 @@ export function Header() {
   const handleAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setAuthError('')
+    setPendingVerificationEmail('')
+    setResendStatus('idle')
     setAuthLoading(true)
 
     const fd = new FormData(e.currentTarget)
@@ -286,7 +291,11 @@ export function Header() {
       }
       setActivePanel(null)
     } catch (err: any) {
-      setAuthError(err?.message || 'Authentication failed')
+      const msg: string = err?.message || 'Authentication failed'
+      setAuthError(msg)
+      if (msg.toLowerCase().includes('verify your email')) {
+        setPendingVerificationEmail(email)
+      }
     } finally {
       setAuthLoading(false)
     }
@@ -496,7 +505,7 @@ export function Header() {
       >
         <div className="flex items-center justify-between px-8 py-7 border-b border-charcoal-100">
           <div>
-            <p className="text-2xs font-sans tracking-[0.3em] uppercase text-charcoal-300">Concierge</p>
+            <p className="text-2xs font-sans tracking-[0.3em] uppercase text-charcoal-500">Concierge</p>
             <p className="font-serif text-2xl mt-1">Akwaluzto</p>
           </div>
           <button onClick={() => setActivePanel(null)} className="text-charcoal p-2 hover:bg-charcoal-100 rounded-full transition-colors">
@@ -536,7 +545,7 @@ export function Header() {
       >
         <div className="flex items-center justify-between px-8 py-7 border-b border-charcoal-100">
           <div>
-            <p className="text-2xs font-sans tracking-[0.3em] uppercase text-charcoal-300">
+            <p className="text-2xs font-sans tracking-[0.3em] uppercase text-charcoal-500">
               {activePanel === 'account' ? (isAuthenticated ? 'My Account' : 'Private Access') : 'Find Pieces'}
             </p>
             <p className="font-serif text-2xl mt-1">Akwaluzto</p>
@@ -587,18 +596,40 @@ export function Header() {
                   <p className="text-sm text-charcoal-400">{authMode === 'signin' ? 'Access your orders and saved items' : 'Join for exclusive access'}</p>
                 </div>
 
-                {authError && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">{authError}</p>}
+                {authError && (
+                  <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded space-y-2">
+                    <p>{authError}</p>
+                    {pendingVerificationEmail && (
+                      <button
+                        type="button"
+                        disabled={resendStatus !== 'idle'}
+                        onClick={async () => {
+                          setResendStatus('sending')
+                          try {
+                            await resendVerification(pendingVerificationEmail)
+                            setResendStatus('sent')
+                          } catch {
+                            setResendStatus('idle')
+                          }
+                        }}
+                        className="underline text-red-700 disabled:opacity-60"
+                      >
+                        {resendStatus === 'sending' ? 'Sending...' : resendStatus === 'sent' ? 'Verification email sent!' : 'Resend verification email'}
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 <form onSubmit={handleAuth} className="space-y-4">
                   {authMode === 'signup' && (
                     <div className="grid grid-cols-2 gap-3">
-                      <input name="firstName" type="text" placeholder="First Name" className="border border-charcoal-200 bg-white px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal-300 focus:outline-none focus:border-charcoal" />
-                      <input name="lastName" type="text" placeholder="Last Name" className="border border-charcoal-200 bg-white px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal-300 focus:outline-none focus:border-charcoal" />
+                      <input name="firstName" type="text" placeholder="First Name" className="border border-charcoal-200 bg-white px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal-400 focus:outline-none focus:border-charcoal" />
+                      <input name="lastName" type="text" placeholder="Last Name" className="border border-charcoal-200 bg-white px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal-400 focus:outline-none focus:border-charcoal" />
                     </div>
                   )}
-                  <input name="email" type="email" required placeholder="Email address" className="w-full border border-charcoal-200 bg-white px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal-300 focus:outline-none focus:border-charcoal" />
+                  <input name="email" type="email" required placeholder="Email address" className="w-full border border-charcoal-200 bg-white px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal-400 focus:outline-none focus:border-charcoal" />
                   <div className="relative">
-                    <input name="password" type={showPassword ? 'text' : 'password'} required minLength={8} placeholder="Password (min 8 characters)" className="w-full border border-charcoal-200 bg-white px-3 py-2.5 pr-10 text-sm text-charcoal placeholder:text-charcoal-300 focus:outline-none focus:border-charcoal" />
+                    <input name="password" type={showPassword ? 'text' : 'password'} required minLength={8} placeholder="Password (min 8 characters)" className="w-full border border-charcoal-200 bg-white px-3 py-2.5 pr-10 text-sm text-charcoal placeholder:text-charcoal-400 focus:outline-none focus:border-charcoal" />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
@@ -651,7 +682,7 @@ export function Header() {
                 name="q"
                 type="search"
                 placeholder="Search products, categories..."
-                className="w-full border border-charcoal-200 bg-white px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-300 focus:outline-none focus:border-charcoal"
+                className="w-full border border-charcoal-200 bg-white px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-400 focus:outline-none focus:border-charcoal"
                 autoFocus
               />
               <button type="submit" className="w-full bg-charcoal text-cream py-3 text-xs tracking-[0.2em] uppercase hover:bg-charcoal/90 transition-colors">

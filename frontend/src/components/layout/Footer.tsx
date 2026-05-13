@@ -23,7 +23,7 @@ export function Footer() {
       <div className="max-w-8xl mx-auto px-6 lg:px-12 py-20 lg:py-24">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-14 lg:gap-20">
           <div>
-            <p className="text-2xs uppercase tracking-[0.35em] text-cream/45 mb-7">Customer Care</p>
+            <p className="text-2xs uppercase tracking-[0.35em] text-cream/60 mb-7">Customer Care</p>
             <ul className="space-y-3.5">
               {[
                 { to: '/contact', label: 'Contact Us' },
@@ -41,7 +41,7 @@ export function Footer() {
           </div>
 
           <div>
-            <p className="text-2xs uppercase tracking-[0.35em] text-cream/45 mb-7">Company</p>
+            <p className="text-2xs uppercase tracking-[0.35em] text-cream/60 mb-7">Company</p>
             <ul className="space-y-3.5">
               {[
                 { to: '/about', label: 'About' },
@@ -59,7 +59,7 @@ export function Footer() {
           </div>
 
           <div className="md:pl-4 lg:pl-10">
-            <p className="text-2xs uppercase tracking-[0.35em] text-cream/45 mb-4">Newsletter</p>
+            <p className="text-2xs uppercase tracking-[0.35em] text-cream/60 mb-4">Newsletter</p>
             <h3 className="font-serif text-3xl text-cream mb-3">Join the Akwaluzto list</h3>
             <p className="text-sm text-cream/65 mb-8 max-w-md">
               Receive early access to new arrivals, curated edits, and private brand updates.
@@ -72,7 +72,7 @@ export function Footer() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email address"
                   required
-                  className="w-full bg-transparent py-3 text-sm text-cream placeholder:text-cream/35 focus:outline-none"
+                  className="w-full bg-transparent py-3 text-sm text-cream placeholder:text-cream/50 focus:outline-none"
                 />
               </div>
               <button
@@ -91,8 +91,8 @@ export function Footer() {
 
       <div className="border-t border-cream/10">
         <div className="max-w-8xl mx-auto px-6 lg:px-12 py-7 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-2xs tracking-[0.18em] uppercase text-cream/35">© {new Date().getFullYear()} Akwaluzto. All rights reserved.</p>
-          <p className="text-2xs text-cream/30">Independent fashion house</p>
+          <p className="text-2xs tracking-[0.18em] uppercase text-cream/50">© {new Date().getFullYear()} Akwaluzto. All rights reserved.</p>
+          <p className="text-2xs text-cream/45">Independent fashion house</p>
         </div>
       </div>
     </footer>

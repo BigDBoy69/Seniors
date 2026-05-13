@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import dns from "dns";
 import { prisma } from "../lib/prisma";
 import { securityLogger, logAuthAttempt } from "../lib/security-logger";
 import { sendVerificationEmail, sendPasswordResetEmail, sendAccountDeletionEmail } from "./email.service";
@@ -201,6 +202,21 @@ function maskIdentifier(identifier: string): string {
   return `${local.charAt(0)}***${local.charAt(local.length - 1)}@${domain}`;
 }
 
+async function validateEmailDomain(email: string): Promise<void> {
+  const domain = email.split('@')[1];
+  if (!domain) throw new Error('Invalid email address');
+  try {
+    const records = await dns.promises.resolveMx(domain);
+    if (!records || records.length === 0) {
+      throw new Error('Email domain does not accept email');
+    }
+  } catch (err: any) {
+    if (err.message === 'Email domain does not accept email') throw err;
+    // DNS resolution failed — domain doesn't exist or has no MX records
+    throw new Error('Email address is invalid or the domain does not exist');
+  }
+}
+
 export async function createUser(
   email: string,
   password: string,
@@ -214,6 +230,9 @@ export async function createUser(
   }
 
   const normalizedEmail = email.toLowerCase().trim();
+
+  await validateEmailDomain(normalizedEmail);
+
   const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
 
   if (existingUser) {
@@ -323,6 +342,12 @@ export async function authenticateUser(
     recordGlobalFailedLogin(normalizedEmail);
     logAuthAttempt(false, normalizedEmail, ip || 'unknown', userAgent, 'Invalid password');
     throw new Error("Invalid credentials");
+  }
+
+  // Block login if email not verified
+  if (!user.emailVerified) {
+    logAuthAttempt(false, normalizedEmail, ip || 'unknown', userAgent, 'Email not verified');
+    throw new Error('email_not_verified');
   }
 
   // Successful login — clear both lockout counters

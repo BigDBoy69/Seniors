@@ -92,8 +92,8 @@ export function OrderConfirmedPage() {
     return (
       <div className="min-h-screen pt-20 bg-cream text-charcoal">
         <div className="max-w-2xl mx-auto px-6 py-20">
-          <p className="text-charcoal-400">Order not found.</p>
-          <Link to="/shop" className="mt-4 inline-block text-xs uppercase tracking-widest border-b border-charcoal pb-px">
+          <p className="text-charcoal-500">Order not found.</p>
+          <Link to="/shop" className="mt-4 inline-block text-xs uppercase tracking-widest text-charcoal border-b border-charcoal pb-px hover:text-charcoal-900 transition-colors">
             Continue Shopping
           </Link>
         </div>
