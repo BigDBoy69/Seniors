@@ -57,7 +57,7 @@ export function CatalogDivisionPage({ divisionKey }: { divisionKey?: string }) {
               </div>
               <div className="luxury-surface p-5 border border-charcoal-100">
                 <h2 className="font-serif text-3xl mb-2.5 group-hover:text-taupe-dark transition-colors duration-300">{category.name}</h2>
-                <p className="text-base font-sans text-charcoal-300 leading-relaxed">{category.description ?? ''}</p>
+                <p className="text-base font-sans text-charcoal-500 leading-relaxed">{category.description ?? ''}</p>
               </div>
             </Link>
           ))}

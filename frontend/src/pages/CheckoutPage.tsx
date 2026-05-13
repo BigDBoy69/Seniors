@@ -82,8 +82,8 @@ export function CheckoutPage() {
     <div className="min-h-screen pt-20">
       <div className="max-w-8xl mx-auto px-6 lg:px-12 pt-16 pb-24">
         <h1 className="font-serif text-5xl mb-12">Checkout</h1>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          <div className="lg:col-span-2 luxury-surface p-6 lg:p-8 flex flex-col gap-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+          <div className="lg:col-span-2 luxury-surface p-6 lg:p-8 flex flex-col gap-5 order-2 lg:order-1">
             <Input label="Full Name" required error={errors.customerName?.message} {...register('customerName')} />
             <Input
               label="Email Address"
@@ -102,7 +102,7 @@ export function CheckoutPage() {
               <div className="bg-red-50 border border-red-200 px-4 py-3 text-sm font-sans text-red-600">{error}</div>
             )}
           </div>
-          <div className="bg-cream-100 p-6 h-fit sticky top-28 text-charcoal">
+          <div className="bg-cream-100 p-6 h-fit lg:sticky lg:top-28 text-charcoal order-1 lg:order-2">
             <h2 className="font-serif text-xl mb-5">Order Review</h2>
             <div className="space-y-3 mb-5 border-b border-charcoal-100 pb-5">
               {items.map((item) => (
