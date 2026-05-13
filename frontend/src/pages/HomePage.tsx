@@ -53,7 +53,7 @@ export function HomePage() {
             <p className="text-xs uppercase tracking-[0.45em] text-cream/70 mb-8">Maison Akwaluzto</p>
             <h1 className="font-serif text-[clamp(4.8rem,12vw,12rem)] text-cream leading-[0.85] mb-10">{homeContent?.heroHeading ?? 'Dressed in Quiet Luxury'}</h1>
             <div className="flex items-center gap-6">
-              <Link to={homeContent?.heroButtonLink ?? '/new-arrivals'} className="inline-flex items-center bg-cream text-charcoal-900 border border-charcoal/10 shadow-sm text-xs font-sans tracking-[0.22em] uppercase px-12 py-5 hover:bg-cream/90 transition-colors duration-300">
+              <Link to={homeContent?.heroButtonLink ?? '/new-arrivals'} className="inline-flex items-center bg-cream text-charcoal text-xs font-sans tracking-[0.22em] uppercase px-12 py-5 hover:bg-cream/90 transition-colors duration-300">
                 {homeContent?.heroButtonText ?? 'New Arrivals'}
               </Link>
             </div>

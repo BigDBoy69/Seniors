@@ -26,8 +26,8 @@ export function ForgotPasswordPage() {
     <div className="min-h-screen pt-24 bg-[#0f0d0c]">
       <div className="max-w-md mx-auto px-6 py-12">
         <div className="luxury-surface p-8">
-          <h1 className="font-serif text-3xl mb-2 text-cream">Forgot Password</h1>
-          <p className="text-sm text-cream/60 mb-6">
+          <h1 className="font-serif text-3xl mb-2 text-charcoal">Forgot Password</h1>
+          <p className="text-sm text-charcoal-500 mb-6">
             Enter your email address and we'll send you a link to reset your password.
           </p>
 
@@ -36,7 +36,7 @@ export function ForgotPasswordPage() {
               <div className="bg-green-50 border border-green-200 p-4 rounded text-sm text-green-800">
                 {message}
               </div>
-              <p className="text-sm text-cream/60">
+              <p className="text-sm text-charcoal-500">
                 Please check your email inbox and spam folder for the password reset link.
               </p>
               <Link
@@ -55,7 +55,7 @@ export function ForgotPasswordPage() {
               )}
 
               <div>
-                <label className="block text-sm font-medium mb-1 text-cream">
+                <label className="block text-sm font-medium mb-1 text-charcoal">
                   Email Address <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -64,7 +64,7 @@ export function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="w-full border border-charcoal-200 bg-white px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal-300 focus:outline-none focus:border-charcoal"
+                  className="w-full border border-charcoal-200 bg-white px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal-400 focus:outline-none focus:border-charcoal"
                   disabled={status === 'loading'}
                 />
               </div>
@@ -80,7 +80,7 @@ export function ForgotPasswordPage() {
               <div className="text-center pt-4">
                 <Link
                   to="/"
-                  className="text-sm text-cream/60 underline hover:text-cream transition-colors"
+                  className="text-sm text-charcoal-500 underline hover:text-charcoal transition-colors"
                 >
                   Back to Sign In
                 </Link>

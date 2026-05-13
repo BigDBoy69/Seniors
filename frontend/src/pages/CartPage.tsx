@@ -36,21 +36,21 @@ export function CartPage() {
                       <Link to={`/shop/${item.slug}`} className="font-serif text-base hover:text-taupe transition-colors leading-snug">
                         {item.name}
                       </Link>
-                      <button onClick={() => removeItem(item.productId, item.variantId)} className="flex items-center gap-1 text-2xs font-sans text-cream/45 hover:text-cream/80 transition-colors self-start mt-1">
+                      <button onClick={() => removeItem(item.productId, item.variantId)} className="flex items-center gap-1 text-2xs font-sans text-cream/65 hover:text-cream transition-colors self-start mt-1">
                         <Trash2 size={12} />
                         Remove
                       </button>
                     </div>
                   </div>
                   <div className="sm:col-span-2 flex items-center justify-center gap-2">
-                    <button onClick={() => updateQuantity(item.productId, item.variantId, item.quantity - 1)} className="w-7 h-7 border border-cream/25 flex items-center justify-center hover:border-cream/70 transition-colors">
+                    <button onClick={() => updateQuantity(item.productId, item.variantId, item.quantity - 1)} className="w-7 h-7 border border-cream/50 flex items-center justify-center hover:border-cream transition-colors">
                       <Minus size={12} />
                     </button>
                     <span className="text-sm w-6 text-center">{item.quantity}</span>
                     <button
                       onClick={() => updateQuantity(item.productId, item.variantId, item.quantity + 1)}
                       disabled={item.quantity >= item.maxStock}
-                      className="w-7 h-7 border border-cream/25 flex items-center justify-center hover:border-cream/70 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="w-7 h-7 border border-cream/50 flex items-center justify-center hover:border-cream transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <Plus size={12} />
                     </button>
@@ -60,26 +60,26 @@ export function CartPage() {
               ))}
             </ul>
             <div className="flex justify-end mt-4">
-              <button onClick={clearCart} className="text-2xs font-sans tracking-widest uppercase text-cream/45 hover:text-cream/80 transition-colors">
+              <button onClick={clearCart} className="text-2xs font-sans tracking-widest uppercase text-cream/65 hover:text-cream transition-colors">
                 Clear Cart
               </button>
             </div>
           </div>
           <div>
-            <div className="bg-cream-100 p-6 sticky top-28 text-charcoal">
-              <h2 className="font-serif text-2xl mb-6">Order Summary</h2>
+            <div className="bg-cream-100 p-6 sticky top-28">
+              <h2 className="font-serif text-2xl text-charcoal mb-6">Order Summary</h2>
               <div className="flex flex-col gap-3 mb-6">
-                <div className="flex justify-between text-sm font-sans text-charcoal-400">
+                <div className="flex justify-between text-sm font-sans text-charcoal-500">
                   <span>Subtotal</span>
                   <span>{formatPrice(subtotal())}</span>
                 </div>
               </div>
               <Divider className="mb-4" />
-              <div className="flex justify-between mb-6">
+              <div className="flex justify-between mb-6 text-charcoal">
                 <span className="text-xs font-sans tracking-widest uppercase">Total</span>
                 <span className="font-serif text-2xl">{formatPrice(subtotal())}</span>
               </div>
-              <Link to="/checkout" className="w-full bg-charcoal text-cream text-xs font-sans tracking-widest uppercase py-4 flex items-center justify-center hover:bg-charcoal-500 transition-all">
+              <Link to="/checkout" style={{ color: '#F8F4EE', backgroundColor: '#1C1917' }} className="w-full text-xs font-sans tracking-widest uppercase py-4 flex items-center justify-center hover:opacity-90 transition-opacity">
                 Proceed to Checkout
               </Link>
             </div>
