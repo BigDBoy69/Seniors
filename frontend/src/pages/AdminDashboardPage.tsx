@@ -288,6 +288,13 @@ export function AdminDashboardPage() {
     event.preventDefault()
     setSaving(true)
     setError(null)
+
+    const errs: string[] = []
+    if (!productForm.name.trim()) errs.push('Name is required')
+    if (!productForm.slug.trim()) errs.push('Slug is required')
+    if (!productForm.price || productForm.price <= 0) errs.push('Price must be greater than 0')
+    if (errs.length) { setError(errs.join(' · ')); setSaving(false); return }
+
     try {
       const payload: AdminProductInput = {
         ...productForm,
@@ -517,11 +524,21 @@ export function AdminDashboardPage() {
             </div>
             <form onSubmit={submitProduct} className="bg-white border border-charcoal-100 p-4 space-y-3">
               <h3 className="font-serif text-2xl">{editingProductId ? 'Edit Product' : 'Add Product'}</h3>
-              <input className="w-full border px-3 py-2" placeholder="Name" value={productForm.name} onChange={(e) => setProductForm((prev) => ({ ...prev, name: e.target.value }))} />
-              <input className="w-full border px-3 py-2" placeholder="Slug" value={productForm.slug} onChange={(e) => setProductForm((prev) => ({ ...prev, slug: e.target.value }))} />
+              <input className="w-full border px-3 py-2" placeholder="Name" value={productForm.name} onChange={(e) => {
+                const name = e.target.value
+                setProductForm((prev) => ({
+                  ...prev,
+                  name,
+                  // Auto-generate slug from name only when creating (not editing)
+                  ...(!editingProductId && {
+                    slug: name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+                  })
+                }))
+              }} />
+              <input className="w-full border px-3 py-2" placeholder="Slug (auto-filled from name)" value={productForm.slug} onChange={(e) => setProductForm((prev) => ({ ...prev, slug: e.target.value.toLowerCase().trim().replace(/[^a-z0-9-]/g, '') }))} />
               <textarea className="w-full border px-3 py-2 min-h-20" placeholder="Description" value={productForm.description} onChange={(e) => setProductForm((prev) => ({ ...prev, description: e.target.value }))} />
               <div className="grid grid-cols-2 gap-2">
-                <input type="number" className="w-full border px-3 py-2" placeholder="Price" value={productForm.price} onChange={(e) => setProductForm((prev) => ({ ...prev, price: Number(e.target.value) }))} />
+                <input type="number" className="w-full border px-3 py-2" placeholder="Price *" min="0.01" step="0.01" value={productForm.price || ''} onChange={(e) => setProductForm((prev) => ({ ...prev, price: e.target.value ? Number(e.target.value) : 0 }))} />
                 <input type="number" className="w-full border px-3 py-2" placeholder="Sale price" value={productForm.compareAtPrice ?? ''} onChange={(e) => setProductForm((prev) => ({ ...prev, compareAtPrice: e.target.value ? Number(e.target.value) : null }))} />
               </div>
               <div className="grid grid-cols-2 gap-2">
